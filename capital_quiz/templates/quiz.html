@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrainLabs Quiz</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .center-container {
+            text-align: center;
+        }
+        form {
+            border: 2px solid #333; /* Choose your desired border color and size */
+            padding: 20px; /* Add some padding for spacing within the border */
+            border-radius: 10px; /* Optional: Add rounded corners to the border */
+        }
+        h2, input, button {
+            margin: 10px 0;
+        }
+        #result{
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="center-container">
+        <form id="quiz-form" method="post">
+            {% csrf_token %}
+            <h2>What is the capital of {{ country.name }}?</h2>
+            <input type="hidden" name="country_id" value="{{ country.id }}">
+            <input type="text" name="user_answer" id="user-answer" required>
+            <button type="submit">Check Answer</button>
+        </form>
+        <div id="result"></div>
+    </div>
+</body>
+</html>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#quiz-form').on('submit', function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '{% url 'check_answer' %}',
+                data: $(this).serialize(),
+                success: function (response) {
+                    $('#result').text(response.result);
+                    if (response.result === 'Incorrect') {
+                        $('#result').append('<br>Correct Answer: ' + response.correct_answer);
+                    }
+                }
+            });
+        });
+    });
+</script>
